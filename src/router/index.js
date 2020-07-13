@@ -10,40 +10,40 @@ Vue.use(VueRouter)
 
 const originalReplace = VueRouter.prototype.replace
 VueRouter.prototype.replace = function replace(location) {
-  return originalReplace.call(this, location).catch((err) => err)
+  return originalReplace.call(this, location).catch(err => err)
 }
 
 const routes = [
   {
     path: '',
-    redirect: '/home',
+    redirect: '/home'
   },
   {
     path: '/home',
     name: 'Home',
-    component: Home,
+    component: Home
   },
   {
     path: '/category',
     name: 'Category',
-    component: Category,
+    component: Category
   },
   {
     path: '/cart',
     name: 'Cart',
-    component: Cart,
+    component: Cart
   },
   {
     path: '/profile',
     name: 'Profile',
-    component: Profile,
-  },
+    component: Profile
+  }
 ]
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
-  routes,
+  routes
 })
 
 export default router
