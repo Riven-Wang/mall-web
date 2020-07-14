@@ -1,9 +1,9 @@
 <template>
   <div class="block">
-    <el-carousel trigger="click" height="150px">
-      <el-carousel-item v-for="(item, index) in items" :key="index">
+    <el-carousel height="200px">
+      <el-carousel-item v-for="(item, index) in banners" :key="index">
         <a :href="item.link">
-          <img :src="item.image" alt />
+          <img :src="item.image" height="100%" width="100%" alt />
         </a>
       </el-carousel-item>
     </el-carousel>
@@ -14,7 +14,7 @@
 export default {
   name: 'Swiper',
   props: {
-    items: {
+    banners: {
       type: Array,
       default() {
         return []
