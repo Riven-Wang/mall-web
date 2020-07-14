@@ -3,23 +3,18 @@
     <nav-bar class="home-nav">
       <template v-slot:center>购物街</template>
     </nav-bar>
-    <home-swiper :banners="banners" />
-    <recommend-view :recommend="recommend" />
-    <feature-view />
-    <tab-control class="tab-control" :titles="['流行', '新款', '精选']" @change="change" />
-    <goods-list :goods="showGoods" />
-    <ul>
-      <li>列表1</li>
-      <li>列表2</li>
-      <li>列表3</li>
-      <li>列表4</li>
-      <li>列表5</li>
-      <li>列表6</li>
-      <li>列表7</li>
-      <li>列表8</li>
-      <li>列表9</li>
-      <li>列表10</li>
-    </ul>
+    <scroll class="content" ref="scroll">
+      <home-swiper :banners="banners" />
+      <recommend-view :recommend="recommend" />
+      <feature-view />
+      <tab-control
+        class="tab-control"
+        :titles="['流行', '新款', '精选']"
+        @change="change"
+      />
+      <goods-list :goods="showGoods" />
+    </scroll>
+    <back-top @click.native="backClick" />
   </div>
 </template>
 
@@ -31,6 +26,8 @@ import FeatureView from './childcomps/FeatureView'
 import NavBar from 'components/common/navbar/NavBar'
 import TabControl from 'components/content/tabcontrol/TabControl'
 import GoodsList from 'components/content/goodslist/GoodsList'
+import Scroll from 'components/common/scroll/Scroll'
+import BackTop from 'components/content/backtop/BackTop'
 
 import { getHomeMultiData, getHomeGoods } from 'network/home'
 
@@ -42,7 +39,9 @@ export default {
     FeatureView,
     NavBar,
     TabControl,
-    GoodsList
+    GoodsList,
+    Scroll,
+    BackTop
   },
   data() {
     return {
@@ -93,6 +92,9 @@ export default {
           this.currentType = 'sell'
           break
       }
+    },
+    backClick() {
+      this.$refs.scroll.scrollTo(0, 0)
     }
   }
 }
@@ -101,6 +103,7 @@ export default {
 <style scoped>
 #home {
   padding-top: 44px;
+  height: 100vh;
 }
 
 .home-nav {
@@ -118,5 +121,15 @@ export default {
   position: sticky;
   top: 40px;
   z-index: 9;
+}
+
+.content {
+  overflow: hidden;
+
+  position: absolute;
+  top: 44px;
+  bottom: 49px;
+  left: 0;
+  right: 0;
 }
 </style>
