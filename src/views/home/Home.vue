@@ -3,15 +3,18 @@
     <nav-bar class="home-nav">
       <template v-slot:center>购物街</template>
     </nav-bar>
-    <scroll class="content" ref="scroll" :probeType="3" @scroll="contentScroll">
+    <scroll
+      class="content"
+      ref="scroll"
+      :probeType="3"
+      @scroll="contentScroll"
+      @pullingUp="loadMore"
+      :pullUpLoad="true"
+    >
       <home-swiper :banners="banners" />
       <recommend-view :recommend="recommend" />
       <feature-view />
-      <tab-control
-        class="tab-control"
-        :titles="['流行', '新款', '精选']"
-        @change="change"
-      />
+      <tab-control class="tab-control" :titles="['流行', '新款', '精选']" @change="change" />
       <goods-list :goods="showGoods" />
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop" />
@@ -30,6 +33,7 @@ import Scroll from 'components/common/scroll/Scroll'
 import BackTop from 'components/content/backtop/BackTop'
 
 import { getHomeMultiData, getHomeGoods } from 'network/home'
+import { debounce } from 'common/utils'
 
 export default {
   name: 'Home',
@@ -68,6 +72,13 @@ export default {
     this.getHomeGoods('sell', 0)
     this.goodList = this.goods['pop'].list
   },
+  mounted() {
+    const refresh = debounce(this.$refs.scroll, 200)
+    this.$bus.$on('imageLoaded', () => {
+      refresh()
+      console.log('-----')
+    })
+  },
   methods: {
     getHomeMultiData() {
       getHomeMultiData().then(res => {
@@ -79,6 +90,7 @@ export default {
       const page = ++this.goods[type].page
       getHomeGoods(type, page).then(res => {
         this.goods[type].list.push(...res.data.list)
+        this.$refs.scroll.finishPullUp()
       })
     },
     change(index) {
@@ -99,6 +111,9 @@ export default {
     },
     contentScroll(position) {
       this.isShowBackTop = -position.y > 1000
+    },
+    loadMore() {
+      this.getHomeGoods(this.currentType)
     }
   }
 }
