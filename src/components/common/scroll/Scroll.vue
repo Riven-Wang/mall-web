@@ -35,7 +35,9 @@ export default {
     },
     refresh() {
       this.scroll && this.scroll.refresh()
-      console.log('------')
+    },
+    getY() {
+      return this.scroll ? this.scroll.y : 0
     }
   },
   mounted() {

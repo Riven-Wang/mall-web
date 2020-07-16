@@ -3,6 +3,13 @@
     <nav-bar class="home-nav">
       <template v-slot:center>购物街</template>
     </nav-bar>
+    <tab-control
+      class="tab-control"
+      :titles="['流行', '新款', '精选']"
+      @change="change"
+      v-show="isShowTabCtrl"
+      ref="tabControl1"
+    />
     <scroll
       class="content"
       ref="scroll"
@@ -11,10 +18,14 @@
       @pullingUp="loadMore"
       :pullUpLoad="true"
     >
-      <home-swiper :banners="banners" />
+      <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad" />
       <recommend-view :recommend="recommend" />
       <feature-view />
-      <tab-control class="tab-control" :titles="['流行', '新款', '精选']" @change="change" />
+      <tab-control
+        :titles="['流行', '新款', '精选']"
+        @change="change"
+        ref="tabControl2"
+      />
       <goods-list :goods="showGoods" />
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop" />
@@ -57,7 +68,10 @@ export default {
         sell: { page: 0, list: [] }
       },
       currentType: 'pop',
-      isShowBackTop: false
+      isShowBackTop: false,
+      isShowTabCtrl: false,
+      tabOffsetTop: 0,
+      saveY: 0
     }
   },
   computed: {
@@ -77,6 +91,13 @@ export default {
     this.$bus.$on('imageLoaded', () => {
       refresh()
     })
+  },
+  activated() {
+    this.$refs.scroll.scrollTo(0, this.saveY)
+    this.$refs.scroll.refresh()
+  },
+  deactivated(){
+    this.saveY = this.$refs.scroll.getY()
   },
   methods: {
     getHomeMultiData() {
@@ -104,15 +125,23 @@ export default {
           this.currentType = 'sell'
           break
       }
+
+      this.$refs.tabControl1.currentIndex = index;
+      this.$refs.tabControl2.currentIndex = index;
+
     },
     backClick() {
       this.$refs.scroll.scrollTo(0, 0)
     },
     contentScroll(position) {
       this.isShowBackTop = -position.y > 1000
+      this.isShowTabCtrl = -position.y > this.tabOffsetTop
     },
     loadMore() {
       this.getHomeGoods(this.currentType)
+    },
+    swiperImageLoad() {
+      this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop
     }
   }
 }
@@ -120,24 +149,16 @@ export default {
 
 <style scoped>
 #home {
-  padding-top: 44px;
   height: 100vh;
 }
 
 .home-nav {
   background-color: var(--color-tint);
   color: #ffffff;
-
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 9;
 }
 
 .tab-control {
-  position: sticky;
-  top: 40px;
+  position: relative;
   z-index: 9;
 }
 

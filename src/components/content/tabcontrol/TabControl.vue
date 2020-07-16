@@ -32,7 +32,6 @@ export default {
   computed: {},
   methods: {
     click(index) {
-      this.currentIndex = index
       this.$emit('change', index)
     }
   }
