@@ -73,10 +73,9 @@ export default {
     this.goodList = this.goods['pop'].list
   },
   mounted() {
-    const refresh = debounce(this.$refs.scroll, 200)
+    const refresh = debounce(this.$refs.scroll.refresh, 50)
     this.$bus.$on('imageLoaded', () => {
       refresh()
-      console.log('-----')
     })
   },
   methods: {
