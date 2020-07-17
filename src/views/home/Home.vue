@@ -21,7 +21,11 @@
       <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad" />
       <recommend-view :recommend="recommend" />
       <feature-view />
-      <tab-control :titles="['流行', '新款', '精选']" @change="change" ref="tabControl2" />
+      <tab-control
+        :titles="['流行', '新款', '精选']"
+        @change="change"
+        ref="tabControl2"
+      />
       <goods-list :goods="showGoods" />
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop" />
@@ -83,17 +87,23 @@ export default {
     this.getHomeGoods('sell', 0)
     this.goodList = this.goods['pop'].list
   },
-  mixins: [itemListenerMixin],
-  mounted() {},
+  // mixins: [itemListenerMixin],
+  mounted() {
+    const refresh = debounce(this.$refs.scroll.refresh, 100)
+    this.imgListener = () => {
+      refresh()
+    }
+    this.$bus.$on('imageLoad', this.imgListener)
+  },
   activated() {
     this.$refs.scroll.scrollTo(0, this.saveY)
     this.$refs.scroll.refresh()
-    this.$bus.$on('imageLoad', this.imgListener)
+    // this.$bus.$on('imageLoad', this.imgListener)
   },
   deactivated() {
     console.log('deactiveted')
     this.saveY = this.$refs.scroll.getY()
-    this.$bus.$off('imageLoad', this.imgListener)
+    // this.$bus.$off('imageLoad', this.imgListener)
   },
   methods: {
     getHomeMultiData() {

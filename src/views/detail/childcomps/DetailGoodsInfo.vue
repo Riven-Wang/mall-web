@@ -11,6 +11,7 @@
         v-for="(item, index) in detailInfo.detailImage[0].list"
         :src="item"
         alt=""
+        @load="imgLoad"
         :key="index"
       />
     </div>
@@ -22,7 +23,15 @@ export default {
   name: 'DetailGoodsInfo',
   props: {
     detailInfo: {
-      type: Object
+      type: Object,
+      default() {
+        return {}
+      }
+    }
+  },
+  methods: {
+    imgLoad() {
+      this.$emit('imgLoad')
     }
   }
 }

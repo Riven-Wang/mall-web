@@ -5,7 +5,7 @@
       <detail-swiper :topImages="topImages" />
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
-      <detail-goods-info :detailInfo="detailInfo" />
+      <detail-goods-info :detailInfo="detailInfo" @imgLoad="imgLoad" />
       <detail-param-info ref="param" :param-info="paramInfo" />
       <detail-comment-info ref="comment" :commentInfo="commentInfo" />
       <goods-list ref="recommend" :goods="recommends" />
@@ -25,7 +25,8 @@ import DetailCommentInfo from './childcomps/DetailCommentInfo'
 import Scroll from 'components/common/scroll/Scroll'
 import GoodsList from 'components/content/goodslist/GoodsList'
 
-import { itemListenerMixin } from 'common/mixin.js'
+import { itemListenerMixin } from 'common/mixin'
+import { debounce } from 'common/utils'
 
 import {
   getDetails,
@@ -48,12 +49,20 @@ export default {
       paramInfo: {},
       commentInfo: {},
       recommends: [],
-      themeTopYs:[]
+      themeTopYs: [],
+      getThemeTopYs: null
     }
   },
   created() {
     this._getDetailData()
     this._getDetailRecommends()
+    this.getThemeTopYs = debounce(() => {
+      this.themeTopYs.push(0)
+      this.themeTopYs.push(this.$refs.param.$el.offsetTop)
+      this.themeTopYs.push(this.$refs.comment.$el.offsetTop)
+      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop)
+      console.log('+++++')
+    })
   },
   components: {
     DetailNavBar,
@@ -66,9 +75,17 @@ export default {
     Scroll,
     GoodsList
   },
-  mixins: [itemListenerMixin],
-  destroyed() {
-    this.$bus.$off('imageLoad', this.imgListener)
+  // mixins: [itemListenerMixin],
+  mounted() {
+    const refresh = debounce(this.$refs.scroll.refresh, 100)
+    this.imgListener = () => {
+      refresh()
+      this.getThemeTopYs()
+    }
+    this.$bus.$on('imageLoad', this.imgListener)
+  },
+  updated() {
+    this.imgListener()
   },
   computed: {},
   methods: {
@@ -92,12 +109,7 @@ export default {
         if (data.rate.cRate !== 0) {
           this.commentInfo = data.rate.list[0]
         }
-        this.$nextTick(() => {
-          this.themeTopYs.push(0)
-          this.themeTopYs.push(this.$refs.param.$el.offsetTop)
-          this.themeTopYs.push(this.$refs.comment.$el.offsetTop)
-          this.themeTopYs.push(this.$refs.recommend.$el.offsetTop)
-        })
+        this.$nextTick(() => {})
       })
     },
     _getDetailRecommends() {
@@ -107,6 +119,9 @@ export default {
     },
     titleClick(index) {
       this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 500)
+    },
+    imgLoad() {
+      this.imgListener()
     }
   }
 }
