@@ -41,6 +41,7 @@ import BackTop from 'components/content/backtop/BackTop'
 
 import { getHomeMultiData, getHomeGoods } from 'network/home'
 import { debounce } from 'common/utils'
+import { itemListenerMixin } from 'common/mixin.js'
 
 export default {
   name: 'Home',
@@ -82,19 +83,17 @@ export default {
     this.getHomeGoods('sell', 0)
     this.goodList = this.goods['pop'].list
   },
-  mounted() {
-    const refresh = debounce(this.$refs.scroll.refresh, 50)
-    this.$bus.$on('imageLoaded', () => {
-      refresh()
-    })
-  },
+  mixins: [itemListenerMixin],
+  mounted() {},
   activated() {
     this.$refs.scroll.scrollTo(0, this.saveY)
     this.$refs.scroll.refresh()
+    this.$bus.$on('imageLoad', this.imgListener)
   },
   deactivated() {
     console.log('deactiveted')
     this.saveY = this.$refs.scroll.getY()
+    this.$bus.$off('imageLoad', this.imgListener)
   },
   methods: {
     getHomeMultiData() {

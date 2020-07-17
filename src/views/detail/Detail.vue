@@ -1,13 +1,14 @@
 <template>
   <div id="detail">
-    <detail-nav-bar />
-    <scroll class="content">
+    <detail-nav-bar @itemClick="titleClick" />
+    <scroll class="content" ref="scroll">
       <detail-swiper :topImages="topImages" />
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
       <detail-goods-info :detailInfo="detailInfo" />
       <detail-param-info ref="param" :param-info="paramInfo" />
-      <detail-comment-info :commentInfo="commentInfo" />
+      <detail-comment-info ref="comment" :commentInfo="commentInfo" />
+      <goods-list ref="recommend" :goods="recommends" />
     </scroll>
   </div>
 </template>
@@ -22,8 +23,17 @@ import DetailParamInfo from './childcomps/DetailParamInfo'
 import DetailCommentInfo from './childcomps/DetailCommentInfo'
 
 import Scroll from 'components/common/scroll/Scroll'
+import GoodsList from 'components/content/goodslist/GoodsList'
 
-import { getDetails, Goods, Shop, GoodsParam } from 'network/detail'
+import { itemListenerMixin } from 'common/mixin.js'
+
+import {
+  getDetails,
+  getRecommends,
+  Goods,
+  Shop,
+  GoodsParam
+} from 'network/detail'
 
 export default {
   name: 'Detail',
@@ -36,11 +46,14 @@ export default {
       shop: {},
       detailInfo: {},
       paramInfo: {},
-      commentInfo: {}
+      commentInfo: {},
+      recommends: [],
+      themeTopYs:[]
     }
   },
   created() {
     this._getDetailData()
+    this._getDetailRecommends()
   },
   components: {
     DetailNavBar,
@@ -50,7 +63,12 @@ export default {
     DetailGoodsInfo,
     DetailParamInfo,
     DetailCommentInfo,
-    Scroll
+    Scroll,
+    GoodsList
+  },
+  mixins: [itemListenerMixin],
+  destroyed() {
+    this.$bus.$off('imageLoad', this.imgListener)
   },
   computed: {},
   methods: {
@@ -74,7 +92,21 @@ export default {
         if (data.rate.cRate !== 0) {
           this.commentInfo = data.rate.list[0]
         }
+        this.$nextTick(() => {
+          this.themeTopYs.push(0)
+          this.themeTopYs.push(this.$refs.param.$el.offsetTop)
+          this.themeTopYs.push(this.$refs.comment.$el.offsetTop)
+          this.themeTopYs.push(this.$refs.recommend.$el.offsetTop)
+        })
       })
+    },
+    _getDetailRecommends() {
+      getRecommends().then(res => {
+        this.recommends = res.data.list
+      })
+    },
+    titleClick(index) {
+      this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 500)
     }
   }
 }
