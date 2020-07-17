@@ -5,6 +5,9 @@
       <detail-swiper :topImages="topImages" />
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
+      <detail-goods-info :detailInfo="detailInfo" />
+      <detail-param-info ref="param" :param-info="paramInfo" />
+      <detail-comment-info :commentInfo="commentInfo" />
     </scroll>
   </div>
 </template>
@@ -14,10 +17,13 @@ import DetailNavBar from './childcomps/DetailNavBar'
 import DetailSwiper from './childcomps/DetailSwiper'
 import DetailBaseInfo from './childcomps/DetailBaseInfo'
 import DetailShopInfo from './childcomps/DetailShopInfo'
+import DetailGoodsInfo from './childcomps/DetailGoodsInfo'
+import DetailParamInfo from './childcomps/DetailParamInfo'
+import DetailCommentInfo from './childcomps/DetailCommentInfo'
 
 import Scroll from 'components/common/scroll/Scroll'
 
-import { getDetails, Goods, Shop } from 'network/detail'
+import { getDetails, Goods, Shop, GoodsParam } from 'network/detail'
 
 export default {
   name: 'Detail',
@@ -27,32 +33,50 @@ export default {
       iid: null,
       topImages: [],
       goods: {},
-      shop: {}
+      shop: {},
+      detailInfo: {},
+      paramInfo: {},
+      commentInfo: {}
     }
   },
   created() {
-    this.iid = this.$route.params.id
-    getDetails(this.iid).then(res => {
-      console.log(res)
-      const data = res.result
-      this.topImages = data.itemInfo.topImages
-      this.goods = new Goods(
-        data.itemInfo,
-        data.columns,
-        data.shopInfo.services
-      )
-      this.shop = new Shop(data.shopInfo)
-    })
+    this._getDetailData()
   },
   components: {
     DetailNavBar,
     DetailSwiper,
     DetailBaseInfo,
     DetailShopInfo,
+    DetailGoodsInfo,
+    DetailParamInfo,
+    DetailCommentInfo,
     Scroll
   },
   computed: {},
-  methods: {}
+  methods: {
+    _getDetailData() {
+      this.iid = this.$route.params.id
+      getDetails(this.iid).then(res => {
+        console.log(res)
+        const data = res.result
+        this.topImages = data.itemInfo.topImages
+        this.goods = new Goods(
+          data.itemInfo,
+          data.columns,
+          data.shopInfo.services
+        )
+        this.shop = new Shop(data.shopInfo)
+        this.detailInfo = data.detailInfo
+        this.paramInfo = new GoodsParam(
+          data.itemParams.info,
+          data.itemParams.rule
+        )
+        if (data.rate.cRate !== 0) {
+          this.commentInfo = data.rate.list[0]
+        }
+      })
+    }
+  }
 }
 </script>
 
