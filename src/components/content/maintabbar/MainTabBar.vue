@@ -31,7 +31,7 @@ export default {
         {
           path: '/profile',
           text: '我的'
-        },
+        }
       ]
     }
   },

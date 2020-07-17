@@ -21,11 +21,7 @@
       <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad" />
       <recommend-view :recommend="recommend" />
       <feature-view />
-      <tab-control
-        :titles="['流行', '新款', '精选']"
-        @change="change"
-        ref="tabControl2"
-      />
+      <tab-control :titles="['流行', '新款', '精选']" @change="change" ref="tabControl2" />
       <goods-list :goods="showGoods" />
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop" />
@@ -96,7 +92,8 @@ export default {
     this.$refs.scroll.scrollTo(0, this.saveY)
     this.$refs.scroll.refresh()
   },
-  deactivated(){
+  deactivated() {
+    console.log('deactiveted')
     this.saveY = this.$refs.scroll.getY()
   },
   methods: {
@@ -126,9 +123,8 @@ export default {
           break
       }
 
-      this.$refs.tabControl1.currentIndex = index;
-      this.$refs.tabControl2.currentIndex = index;
-
+      this.$refs.tabControl1.currentIndex = index
+      this.$refs.tabControl2.currentIndex = index
     },
     backClick() {
       this.$refs.scroll.scrollTo(0, 0)

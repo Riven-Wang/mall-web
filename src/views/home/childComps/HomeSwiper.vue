@@ -1,24 +1,20 @@
 <template>
-  <div class="block">
-    <el-carousel height="180px">
-      <el-carousel-item v-for="(item, index) in banners" :key="index">
+  <div class="home-swiper">
+    <swiper>
+      <swiper-item v-for="(item, index) in banners" :key="index">
         <a :href="item.link">
-          <img
-            :src="item.image"
-            height="100%"
-            width="100%"
-            alt
-            @load="imageLoad"
-          />
+          <img :src="item.image" alt @load="imageLoad" />
         </a>
-      </el-carousel-item>
-    </el-carousel>
+      </swiper-item>
+    </swiper>
   </div>
 </template>
 
 <script>
+import { Swiper, SwiperItem } from 'components/common/swiper'
+
 export default {
-  name: 'Swiper',
+  name: 'HomeSwiper',
   props: {
     banners: {
       type: Array,
@@ -26,6 +22,10 @@ export default {
         return []
       }
     }
+  },
+  components: {
+    Swiper,
+    SwiperItem
   },
   methods: {
     imageLoad() {
