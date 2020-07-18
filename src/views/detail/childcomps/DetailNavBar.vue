@@ -26,11 +26,21 @@ import NavBar from 'components/common/navbar/NavBar'
 
 export default {
   name: 'DetailNavBar',
-  props: {},
+  props: {
+    scrollIndex: {
+      type: Number,
+      default: 0
+    }
+  },
   data() {
     return {
       titles: ['商品', '参数', '评论', '推荐'],
-      currentIndex: 0
+      currentIndex: this.scrollIndex
+    }
+  },
+  watch: {
+    scrollIndex: function() {
+      this.currentIndex = this.scrollIndex
     }
   },
   components: {

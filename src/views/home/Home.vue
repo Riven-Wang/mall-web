@@ -21,11 +21,7 @@
       <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad" />
       <recommend-view :recommend="recommend" />
       <feature-view />
-      <tab-control
-        :titles="['流行', '新款', '精选']"
-        @change="change"
-        ref="tabControl2"
-      />
+      <tab-control :titles="['流行', '新款', '精选']" @change="change" ref="tabControl2" />
       <goods-list :goods="showGoods" />
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop" />
@@ -41,11 +37,10 @@ import NavBar from 'components/common/navbar/NavBar'
 import TabControl from 'components/content/tabcontrol/TabControl'
 import GoodsList from 'components/content/goodslist/GoodsList'
 import Scroll from 'components/common/scroll/Scroll'
-import BackTop from 'components/content/backtop/BackTop'
 
 import { getHomeMultiData, getHomeGoods } from 'network/home'
 import { debounce } from 'common/utils'
-import { itemListenerMixin } from 'common/mixin.js'
+import { itemListenerMixin, BackTopMixin } from 'common/mixin.js'
 
 export default {
   name: 'Home',
@@ -56,8 +51,7 @@ export default {
     NavBar,
     TabControl,
     GoodsList,
-    Scroll,
-    BackTop
+    Scroll
   },
   data() {
     return {
@@ -69,7 +63,6 @@ export default {
         sell: { page: 0, list: [] }
       },
       currentType: 'pop',
-      isShowBackTop: false,
       isShowTabCtrl: false,
       tabOffsetTop: 0,
       saveY: 0
@@ -87,23 +80,16 @@ export default {
     this.getHomeGoods('sell', 0)
     this.goodList = this.goods['pop'].list
   },
-  // mixins: [itemListenerMixin],
-  mounted() {
-    const refresh = debounce(this.$refs.scroll.refresh, 100)
-    this.imgListener = () => {
-      refresh()
-    }
-    this.$bus.$on('imageLoad', this.imgListener)
-  },
+  mixins: [itemListenerMixin, BackTopMixin],
+  mounted() {},
   activated() {
     this.$refs.scroll.scrollTo(0, this.saveY)
     this.$refs.scroll.refresh()
-    // this.$bus.$on('imageLoad', this.imgListener)
+    this.$bus.$on('imageLoad', this.imgListener)
   },
   deactivated() {
-    console.log('deactiveted')
     this.saveY = this.$refs.scroll.getY()
-    // this.$bus.$off('imageLoad', this.imgListener)
+    this.$bus.$off('imageLoad', this.imgListener)
   },
   methods: {
     getHomeMultiData() {
@@ -135,11 +121,8 @@ export default {
       this.$refs.tabControl1.currentIndex = index
       this.$refs.tabControl2.currentIndex = index
     },
-    backClick() {
-      this.$refs.scroll.scrollTo(0, 0)
-    },
     contentScroll(position) {
-      this.isShowBackTop = -position.y > 1000
+      this.showBackTop(position)
       this.isShowTabCtrl = -position.y > this.tabOffsetTop
     },
     loadMore() {

@@ -1,7 +1,7 @@
 <template>
   <div id="detail">
-    <detail-nav-bar @itemClick="titleClick" />
-    <scroll class="content" ref="scroll">
+    <detail-nav-bar @itemClick="titleClick" :scrollIndex="scrollIndex" />
+    <scroll class="content" ref="scroll" @scroll="scroll" :probeType="3">
       <detail-swiper :topImages="topImages" />
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
@@ -10,6 +10,8 @@
       <detail-comment-info ref="comment" :commentInfo="commentInfo" />
       <goods-list ref="recommend" :goods="recommends" />
     </scroll>
+    <detail-bottom-bar />
+    <back-top @click.native="backClick" v-show="isShowBackTop" />
   </div>
 </template>
 
@@ -21,11 +23,12 @@ import DetailShopInfo from './childcomps/DetailShopInfo'
 import DetailGoodsInfo from './childcomps/DetailGoodsInfo'
 import DetailParamInfo from './childcomps/DetailParamInfo'
 import DetailCommentInfo from './childcomps/DetailCommentInfo'
+import DetailBottomBar from './childcomps/DetailBottomBar'
 
 import Scroll from 'components/common/scroll/Scroll'
 import GoodsList from 'components/content/goodslist/GoodsList'
 
-import { itemListenerMixin } from 'common/mixin'
+import { itemListenerMixin, BackTopMixin } from 'common/mixin'
 import { debounce } from 'common/utils'
 
 import {
@@ -50,18 +53,19 @@ export default {
       commentInfo: {},
       recommends: [],
       themeTopYs: [],
-      getThemeTopYs: null
+      getThemeTopYs: null,
+      scrollIndex: 0
     }
   },
   created() {
     this._getDetailData()
     this._getDetailRecommends()
     this.getThemeTopYs = debounce(() => {
+      this.themeTopYs = []
       this.themeTopYs.push(0)
       this.themeTopYs.push(this.$refs.param.$el.offsetTop)
       this.themeTopYs.push(this.$refs.comment.$el.offsetTop)
       this.themeTopYs.push(this.$refs.recommend.$el.offsetTop)
-      console.log('+++++')
     })
   },
   components: {
@@ -72,20 +76,14 @@ export default {
     DetailGoodsInfo,
     DetailParamInfo,
     DetailCommentInfo,
+    DetailBottomBar,
     Scroll,
     GoodsList
   },
-  // mixins: [itemListenerMixin],
-  mounted() {
-    const refresh = debounce(this.$refs.scroll.refresh, 100)
-    this.imgListener = () => {
-      refresh()
-      this.getThemeTopYs()
-    }
-    this.$bus.$on('imageLoad', this.imgListener)
-  },
-  updated() {
-    this.imgListener()
+  mixins: [itemListenerMixin, BackTopMixin],
+  mounted() {},
+  destroyed() {
+    this.$bus.$off('imageLoad', this.imgListener)
   },
   computed: {},
   methods: {
@@ -122,6 +120,20 @@ export default {
     },
     imgLoad() {
       this.imgListener()
+      this.getThemeTopYs()
+    },
+    scroll(position) {
+      this.showBackTop(position)
+      const y = -position.y
+      if (y >= this.themeTopYs[3]) {
+        this.scrollIndex = 3
+      } else if (y >= this.themeTopYs[2]) {
+        this.scrollIndex = 2
+      } else if (y >= this.themeTopYs[1]) {
+        this.scrollIndex = 1
+      } else {
+        this.scrollIndex = 0
+      }
     }
   }
 }
@@ -140,7 +152,7 @@ export default {
 
   position: absolute;
   top: 44px;
-  bottom: 0;
+  bottom: 49px;
   left: 0;
   right: 0;
 }
