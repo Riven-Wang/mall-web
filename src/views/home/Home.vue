@@ -21,7 +21,11 @@
       <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad" />
       <recommend-view :recommend="recommend" />
       <feature-view />
-      <tab-control :titles="['流行', '新款', '精选']" @change="change" ref="tabControl2" />
+      <tab-control
+        :titles="['流行', '新款', '精选']"
+        @change="change"
+        ref="tabControl2"
+      />
       <goods-list :goods="showGoods" />
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop" />
@@ -62,10 +66,12 @@ export default {
         new: { page: 0, list: [] },
         sell: { page: 0, list: [] }
       },
+      pages: [],
       currentType: 'pop',
       isShowTabCtrl: false,
       tabOffsetTop: 0,
-      saveY: 0
+      saveY: 0,
+      once: false
     }
   },
   computed: {
@@ -117,7 +123,12 @@ export default {
           this.currentType = 'sell'
           break
       }
-
+      const y = this.$refs.scroll.getY()
+      if (-y >= this.tabOffsetTop) {
+        const preIndex = this.$refs.tabControl1.currentIndex
+        this.pages[preIndex] = y
+        this.$refs.scroll.scrollTo(0, this.pages[index])
+      }
       this.$refs.tabControl1.currentIndex = index
       this.$refs.tabControl2.currentIndex = index
     },
@@ -129,7 +140,13 @@ export default {
       this.getHomeGoods(this.currentType)
     },
     swiperImageLoad() {
-      this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop
+      if (!this.once) {
+        this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop
+        for (let item in this.goods) {
+          this.pages.push(-this.tabOffsetTop)
+        }
+        this.once = true
+      }
     }
   }
 }
