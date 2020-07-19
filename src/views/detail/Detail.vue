@@ -10,7 +10,7 @@
       <detail-comment-info ref="comment" :commentInfo="commentInfo" />
       <goods-list ref="recommend" :goods="recommends" />
     </scroll>
-    <detail-bottom-bar />
+    <detail-bottom-bar @addToCart="addToCart" />
     <back-top @click.native="backClick" v-show="isShowBackTop" />
   </div>
 </template>
@@ -30,6 +30,8 @@ import GoodsList from 'components/content/goodslist/GoodsList'
 
 import { itemListenerMixin, BackTopMixin } from 'common/mixin'
 import { debounce } from 'common/utils'
+
+import { mapActions } from 'vuex'
 
 import {
   getDetails,
@@ -107,7 +109,6 @@ export default {
         if (data.rate.cRate !== 0) {
           this.commentInfo = data.rate.list[0]
         }
-        this.$nextTick(() => {})
       })
     },
     _getDetailRecommends() {
@@ -134,6 +135,21 @@ export default {
       } else {
         this.scrollIndex = 0
       }
+    },
+    ...mapActions(['addCart']),
+    addToCart() {
+      const product = {}
+      product.image = this.topImages[0]
+      product.title = this.goods.title
+      product.desc = this.goods.desc
+      product.price = this.goods.realPrice
+      product.iid = this.iid
+      product.isChecked = true
+
+      this.addCart(product).then(res => {
+        console.log(res)
+        this.$toast.show(res)
+      })
     }
   }
 }
